@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: d-k-bo <d-k-bo@mailbox.org>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+[package]
+name = "webdav-headers"
+version = "0.1.0"
+authors = ["d-k-bo <d-k-bo@mailbox.org>"]
+edition = "2021"
+description = "HTTP headers for WebDAV"
+repository = "https://github.com/d-k-bo/webdav-rs"
+license = "MIT OR Apache-2.0"
+keywords = ["webdav", "http", "rfc4918", "headers"]
+categories = ["network-programming", "web-programming", "filesystem"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+headers = "0.4.0"
+http = { workspace = true }
+itertools = "0.12.1"
+nonempty = { workspace = true }
+uniresid = { version = "0.1.5", default-features = false }
+
+[dev-dependencies]
+eyre = { workspace = true }
+pretty_assertions = { workspace = true }

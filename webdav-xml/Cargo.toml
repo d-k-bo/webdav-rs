@@ -1,0 +1,30 @@
+# SPDX-FileCopyrightText: d-k-bo <d-k-bo@mailbox.org>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+[package]
+name = "webdav-xml"
+version = "0.1.0"
+authors = ["d-k-bo <d-k-bo@mailbox.org>"]
+edition = "2021"
+description = "XML elements and (de)serialization for WebDAV"
+repository = "https://github.com/d-k-bo/webdav-rs"
+license = "MIT OR Apache-2.0"
+keywords = ["webdav", "http", "rfc4918", "xml"]
+categories = ["network-programming", "web-programming", "filesystem"]
+
+[dependencies]
+bytes = "1.5.0"
+bytestring = "1.3.1"
+http = { workspace = true }
+httpdate = "1.0.3"
+indexmap = "2.2.3"
+mime = "0.3.17"
+nonempty = { workspace = true }
+quick-xml = "0.31.0"
+thiserror = "1.0.57"
+time = { version = "0.3.34", features = ["parsing", "formatting"] }
+
+[dev-dependencies]
+eyre = { workspace = true }
+pretty_assertions = { workspace = true }

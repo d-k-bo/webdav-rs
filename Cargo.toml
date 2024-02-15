@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: d-k-bo <d-k-bo@mailbox.org>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+[workspace]
+members = [".", "webdav-headers", "webdav-methods", "webdav-xml"]
+resolver = "2"
+
+[workspace.dependencies]
+eyre = "0.6.12"
+http = "1.0.0"
+nonempty = "0.9.0"
+pretty_assertions = "1.4.0"
+
+[package]
+name = "webdav-meta"
+version = "0.1.0"
+authors = ["d-k-bo <d-k-bo@mailbox.org>"]
+edition = "2021"
+description = "Reusable types for implementing WebDAV clients and servers"
+repository = "https://github.com/d-k-bo/webdav-rs"
+license = "MIT OR Apache-2.0"
+keywords = ["webdav", "http", "rfc4918", "headers", "xml"]
+categories = ["network-programming", "web-programming", "filesystem"]
+
+[features]
+default = ["headers", "methods", "xml"]
+headers = ["dep:webdav-headers"]
+methods = ["dep:webdav-methods"]
+xml = ["dep:webdav-xml"]
+
+[dependencies]
+webdav-headers = { version = "0.1.0", path = "./webdav-headers", optional = true }
+webdav-methods = { version = "0.1.0", path = "./webdav-methods", optional = true }
+webdav-xml = { version = "0.1.0", path = "./webdav-xml", optional = true }
+
+# see https://stackoverflow.com/a/61417700/14750360
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[[package.metadata.release.pre-release-replacements]]
+file = "CHANGELOG.md"
+search = "## \\[Unreleased\\]"
+replace = """## [Unreleased]\n\n## [{{version}}] - {{date}}"""
+exactly = 1
+
+[[package.metadata.release.pre-release-replacements]]
+file = "CHANGELOG.md"
+search = "\\.\\.\\.HEAD"
+replace = "...{{tag_name}}"
+exactly = 1
+
+[[package.metadata.release.pre-release-replacements]]
+file = "CHANGELOG.md"
+search = "\\[Unreleased\\]: "
+replace = """[Unreleased]: https://github.com/d-k-bo/webdav-rs/compare/{{tag_name}}...HEAD\n[{{version}}]: """
+exactly = 1
