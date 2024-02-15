@@ -39,20 +39,20 @@ webdav-xml = { version = "0.1.0", path = "./webdav-xml", optional = true }
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
-# [[package.metadata.release.pre-release-replacements]]
-# file = "CHANGELOG.md"
-# search = "## \\[Unreleased\\]"
-# replace = """## [Unreleased]\n\n## [{{version}}] - {{date}}"""
-# exactly = 1
+[[package.metadata.release.pre-release-replacements]]
+file = "CHANGELOG.md"
+search = "## \\[Unreleased\\]"
+replace = """## [Unreleased]\n\n## [{{version}}] - {{date}}"""
+exactly = 1
 
-# [[package.metadata.release.pre-release-replacements]]
-# file = "CHANGELOG.md"
-# search = "\\.\\.\\.HEAD"
-# replace = "...{{tag_name}}"
-# exactly = 1
+[[package.metadata.release.pre-release-replacements]]
+file = "CHANGELOG.md"
+search = "\\.\\.\\.HEAD"
+replace = "...{{tag_name}}"
+exactly = 1
 
-# [[package.metadata.release.pre-release-replacements]]
-# file = "CHANGELOG.md"
-# search = "\\[Unreleased\\]: "
-# replace = """[Unreleased]: https://github.com/d-k-bo/webdav-rs/compare/{{tag_name}}...HEAD\n[{{version}}]: """
-# exactly = 1
+[[package.metadata.release.pre-release-replacements]]
+file = "CHANGELOG.md"
+search = "\\[Unreleased\\]: "
+replace = """[Unreleased]: https://github.com/d-k-bo/webdav-rs/compare/{{tag_name}}...HEAD\n[{{version}}]: """
+exactly = 1
