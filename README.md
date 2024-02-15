@@ -98,7 +98,7 @@ to constants in the future.
 - [X] `propstat`
 - [ ] `remove`
 - [X] `response`
-- [ ] `responsedescription`: currently just a string
+- [X] `responsedescription`
 - [ ] `set`
 - [ ] `shared`
 - [ ] `status`
