@@ -164,6 +164,7 @@ impl ValueMap {
     // }
     pub(crate) fn insert_raw(&mut self, key: ElementName<ByteString>, value: Value) {
         match self.0.get_mut(&key) {
+            Some(Value::List(list)) => list.push(value),
             Some(old_value) => {
                 *old_value = Value::List(Box::new(nonempty![std::mem::take(old_value), value]));
             }
