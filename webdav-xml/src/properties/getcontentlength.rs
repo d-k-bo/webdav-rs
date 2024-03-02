@@ -19,7 +19,7 @@ impl TryFrom<&Value> for ContentLength {
     type Error = Error;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        value.to_str()?.parse().map(Self).map_err(Error::other)
+        value.to_text()?.parse().map(Self).map_err(Error::other)
     }
 }
 

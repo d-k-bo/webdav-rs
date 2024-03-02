@@ -20,7 +20,7 @@ impl TryFrom<&Value> for ResponseDescription {
     type Error = Error;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        Ok(Self(value.to_str()?.to_owned()))
+        Ok(Self(value.to_text()?.to_owned()))
     }
 }
 

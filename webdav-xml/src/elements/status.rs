@@ -45,7 +45,7 @@ impl TryFrom<&Value> for Status {
     type Error = Error;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        value.to_str()?.parse().map_err(Error::other)
+        value.to_text()?.parse().map_err(Error::other)
     }
 }
 impl From<Status> for Value {

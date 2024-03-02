@@ -20,7 +20,7 @@ impl TryFrom<&Value> for Href {
     type Error = Error;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        Ok(Self(value.to_str()?.parse().map_err(Error::other)?))
+        Ok(Self(value.to_text()?.parse().map_err(Error::other)?))
     }
 }
 

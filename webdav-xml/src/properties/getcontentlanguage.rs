@@ -21,7 +21,7 @@ impl TryFrom<&Value> for ContentLanguage {
     type Error = Error;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        Ok(Self(value.to_str()?.clone()))
+        Ok(Self(value.to_text()?.clone()))
     }
 }
 

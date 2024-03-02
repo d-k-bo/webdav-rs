@@ -20,7 +20,7 @@ impl TryFrom<&Value> for CreationDate {
     type Error = Error;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        OffsetDateTime::parse(value.to_str()?, &Rfc3339)
+        OffsetDateTime::parse(value.to_text()?, &Rfc3339)
             .map(Self)
             .map_err(Error::other)
     }

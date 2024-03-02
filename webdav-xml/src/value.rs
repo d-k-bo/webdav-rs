@@ -32,7 +32,7 @@ pub enum Value {
 }
 
 impl Value {
-    pub fn to_str(&self) -> Result<&ByteString, Error> {
+    pub fn to_text(&self) -> Result<&ByteString, Error> {
         match self {
             Self::Text(s) => Ok(s),
             _ => Err(Error::InvalidValueType("expected text")),
