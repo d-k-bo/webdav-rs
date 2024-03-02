@@ -60,57 +60,98 @@ impl From<Multistatus> for Value {
 }
 
 #[cfg(test)]
-#[test]
-fn test() -> eyre::Result<()> {
-    use http::StatusCode;
+mod tests {
+    use crate::FromXml as _;
 
-    use crate::{
-        elements::{Href, Status},
-        FromXml,
-    };
+    use super::*;
 
-    // http://webdav.org/specs/rfc4918.html#n-example---retrieving-named-properties
-    let xml = r#"
-    <?xml version="1.0" encoding="utf-8" ?>
-    <D:multistatus xmlns:D="DAV:">
-      <D:response xmlns:R="http://ns.example.com/boxschema/">
-        <D:href>http://www.example.com/file</D:href>
-        <D:propstat>
-          <D:prop>
-            <R:bigbox>
-              <R:BoxType>Box type A</R:BoxType>
-            </R:bigbox>
-            <R:author>
-              <R:Name>J.J. Johnson</R:Name>
-            </R:author>
-          </D:prop>
-          <D:status>HTTP/1.1 200 OK</D:status>
-        </D:propstat>
-        <D:propstat>
-          <D:prop><R:DingALing/><R:Random/></D:prop>
-          <D:status>HTTP/1.1 403 Forbidden</D:status>
-          <D:responsedescription> The user does not have access to the
-     DingALing property.
+    #[test]
+    fn parse_propfind_example() -> eyre::Result<()> {
+        use http::StatusCode;
+
+        use crate::elements::{Href, Status};
+
+        // http://webdav.org/specs/rfc4918.html#n-example---retrieving-named-properties
+        let xml = r#"
+        <?xml version="1.0" encoding="utf-8" ?>
+        <D:multistatus xmlns:D="DAV:">
+          <D:response xmlns:R="http://ns.example.com/boxschema/">
+            <D:href>http://www.example.com/file</D:href>
+            <D:propstat>
+              <D:prop>
+                <R:bigbox>
+                  <R:BoxType>Box type A</R:BoxType>
+                </R:bigbox>
+                <R:author>
+                  <R:Name>J.J. Johnson</R:Name>
+                </R:author>
+              </D:prop>
+              <D:status>HTTP/1.1 200 OK</D:status>
+            </D:propstat>
+            <D:propstat>
+              <D:prop><R:DingALing/><R:Random/></D:prop>
+              <D:status>HTTP/1.1 403 Forbidden</D:status>
+              <D:responsedescription> The user does not have access to the
+         DingALing property.
+              </D:responsedescription>
+            </D:propstat>
+          </D:response>
+          <D:responsedescription> There has been an access violation error.
           </D:responsedescription>
-        </D:propstat>
-      </D:response>
-      <D:responsedescription> There has been an access violation error.
-      </D:responsedescription>
-    </D:multistatus>
-    "#;
-    let multistatus = Multistatus::from_xml(xml)?;
+        </D:multistatus>
+        "#;
+        let multistatus = Multistatus::from_xml(xml)?;
 
-    assert!(matches!(
-      &multistatus.response[0],
-        Response::Propstat {
-            href, propstat,
-            responsedescription: None,
-            ..
-        } if href == &Href(http::Uri::from_static("http://www.example.com/file"))
-          && propstat[0].status == Status(StatusCode::OK)
-          && propstat[1].status == Status(StatusCode::FORBIDDEN)
-          && propstat[1].responsedescription.is_some()
-    ));
+        assert!(matches!(
+          &multistatus.response[0],
+            Response::Propstat {
+                href, propstat,
+                responsedescription: None,
+                ..
+            } if href == &Href(http::Uri::from_static("http://www.example.com/file"))
+              && propstat[0].status == Status(StatusCode::OK)
+              && propstat[1].status == Status(StatusCode::FORBIDDEN)
+              && propstat[1].responsedescription.is_some()
+        ));
 
-    Ok(())
+        Ok(())
+    }
+
+    #[test]
+    fn parse_multiple_responses() -> eyre::Result<()> {
+        let response = r#"
+        <?xml version="1.0" encoding="utf-8"?>
+        <D:multistatus xmlns:D="DAV:">
+          <D:response>
+            <D:href>/foo/</D:href>
+            <D:propstat>
+              <D:prop>
+              </D:prop>
+              <D:status>HTTP/1.1 200 OK</D:status>
+            </D:propstat>
+          </D:response>
+          <D:response>
+            <D:href>/bar/</D:href>
+            <D:propstat>
+              <D:prop>
+              </D:prop>
+              <D:status>HTTP/1.1 200 OK</D:status>
+            </D:propstat>
+          </D:response>
+          <D:response>
+            <D:href>/baz/</D:href>
+            <D:propstat>
+              <D:prop>
+              </D:prop>
+              <D:status>HTTP/1.1 200 OK</D:status>
+            </D:propstat>
+          </D:response>
+        </D:multistatus>  
+        "#;
+
+        let multistatus = Multistatus::from_xml(response)?;
+        assert_eq!(multistatus.response.len(), 3);
+
+        Ok(())
+    }
 }
