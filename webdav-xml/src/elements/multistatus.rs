@@ -29,20 +29,28 @@ impl TryFrom<&Value> for Multistatus {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         let map = value.to_map()?;
 
-        let mut response = Vec::new();
-        for (_, value) in &map.0 {
+        fn iter_response_items(
+            mut acc: Vec<Response>,
+            value: &Value,
+        ) -> Result<Vec<Response>, Error> {
             if value.is_list() {
-                let list = value.to_list()?;
-                for item in list {
-                    if let Ok(value) = Response::try_from(item) {
-                        response.push(value);
+                for item in value.to_list()? {
+                    if item.is_list() {
+                        acc = iter_response_items(acc, item)?;
+                    } else {
+                        acc.push(Response::try_from(item)?);
                     }
                 }
-            } else {
-                if let Ok(value) = Response::try_from(value) {
-                    response.push(value);
-                }
+            } else if value.is_map() {
+                acc.push(Response::try_from(value)?);
             }
+
+            Ok(acc)
+        }
+
+        let mut response = Vec::new();
+        for (_, value) in &map.0 {
+            response.extend(iter_response_items(vec![], value)?);
         }
 
         Ok(Multistatus {
@@ -82,7 +90,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn test() -> eyre::Result<()> {
+    fn test_should_parse_single_prop() -> eyre::Result<()> {
         use http::StatusCode;
 
         use crate::{
@@ -251,6 +259,7 @@ mod test {
                 
 "#;
 
-        assert!(Multistatus::from_xml(response).is_ok());
+        let multistatus = Multistatus::from_xml(response).unwrap();
+        assert_eq!(multistatus.response.len(), 3);
     }
 }

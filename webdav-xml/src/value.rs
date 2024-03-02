@@ -55,6 +55,10 @@ impl Value {
     pub fn is_list(&self) -> bool {
         matches!(self, Self::List(_))
     }
+
+    pub fn is_map(&self) -> bool {
+        matches!(self, Self::Map(_))
+    }
 }
 
 impl From<String> for Value {
