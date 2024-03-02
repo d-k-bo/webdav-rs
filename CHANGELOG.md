@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add more helper methods to `Value`
+- Add some unit tests
+
+### Changed
+
+- **BREAKING**: Rename `Value::to_str` to `Value::to_text`
+
+### Fixed
+
+- Fix lists with more than 2 items not being parsed correctly ([#2](https://github.com/d-k-bo/webdav-rs/issues/2))
+
 ## [0.1.0] - 2024-02-15
 
 [Unreleased]: https://github.com/d-k-bo/webdav-rs/compare/v0.1.0...HEAD
