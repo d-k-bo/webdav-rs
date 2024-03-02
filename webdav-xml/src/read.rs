@@ -119,3 +119,77 @@ impl<'x> XmlReader<'x> {
         Ok(Value::Map(map))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use nonempty::nonempty;
+    use pretty_assertions::assert_eq;
+
+    use super::*;
+
+    macro_rules! value_map {
+        { $($key:expr => $value:expr),* $(,)? } => {
+            ValueMap(crate::value::InnerValueMap::from([
+                $(
+                    (
+                        crate::element::ElementName { local_name: ByteString::from_static($key), namespace: None, prefix: None },
+                        $value
+                    ),
+                )*
+            ]))
+        };
+    }
+
+    #[test]
+    fn empty() -> eyre::Result<()> {
+        let xml = r#"<foo/>"#;
+        let value = Value::Map(value_map! {
+            "foo" => Value::Empty
+        });
+        assert_eq!(value, read_xml(xml)?);
+        Ok(())
+    }
+
+    #[test]
+    fn text() -> eyre::Result<()> {
+        let xml = r#"<foo>bar</foo>"#;
+        let value = Value::Map(value_map! {
+            "foo" => Value::Text("bar".into()),
+        });
+        assert_eq!(value, read_xml(xml)?);
+        Ok(())
+    }
+
+    #[test]
+    fn map() -> eyre::Result<()> {
+        let xml = r#"<foo><bar /></foo>"#;
+        let value = Value::Map(value_map! {
+            "foo" => Value::Map(value_map! {
+                "bar" => Value::Empty,
+            }),
+        });
+        assert_eq!(value, read_xml(xml)?);
+        Ok(())
+    }
+
+    #[test]
+    fn list() -> eyre::Result<()> {
+        let xml = r#"<foo /><foo />"#;
+        let value = Value::Map(value_map! {
+            "foo" => Value::List(Box::new(nonempty![Value::Empty, Value::Empty])),
+        });
+        assert_eq!(value, read_xml(xml)?);
+        Ok(())
+    }
+
+    #[test]
+    // https://github.com/d-k-bo/webdav-rs/issues/2
+    fn list_long() -> eyre::Result<()> {
+        let xml = r#"<foo /><foo /><foo /><foo /><foo />"#;
+        let value = Value::Map(value_map! {
+            "foo" => Value::List(Box::new(nonempty![Value::Empty, Value::Empty, Value::Empty, Value::Empty, Value::Empty])),
+        });
+        assert_eq!(value, read_xml(xml)?);
+        Ok(())
+    }
+}

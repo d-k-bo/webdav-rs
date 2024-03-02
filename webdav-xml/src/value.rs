@@ -52,7 +52,7 @@ impl From<String> for Value {
     }
 }
 
-type InnerValueMap = IndexMap<ElementName<ByteString>, Value>;
+pub(crate) type InnerValueMap = IndexMap<ElementName<ByteString>, Value>;
 
 /// A mapping from tag names to [`Value`]s.
 #[derive(Clone, Debug, Default, PartialEq)]
