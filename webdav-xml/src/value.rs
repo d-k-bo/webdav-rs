@@ -44,6 +44,29 @@ impl Value {
             _ => Err(Error::InvalidValueType("expected a map")),
         }
     }
+
+    pub fn to_list(&self) -> Result<&NonEmpty<Value>, Error> {
+        match self {
+            Self::List(list) => Ok(list),
+            _ => Err(Error::InvalidValueType("expected a list")),
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        matches!(self, Self::Empty)
+    }
+
+    pub fn is_text(&self) -> bool {
+        matches!(self, Self::Text(_))
+    }
+
+    pub fn is_map(&self) -> bool {
+        matches!(self, Self::Map(_))
+    }
+
+    pub fn is_list(&self) -> bool {
+        matches!(self, Self::List(_))
+    }
 }
 
 impl From<String> for Value {
