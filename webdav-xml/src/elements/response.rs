@@ -40,6 +40,7 @@ impl TryFrom<&Value> for Response {
     type Error = Error;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        println!("response {:#?}", value);
         let map = value.to_map()?;
 
         match NonEmpty::try_collect(map.iter_all::<Propstat>())? {

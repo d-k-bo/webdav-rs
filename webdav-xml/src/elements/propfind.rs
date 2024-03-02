@@ -24,6 +24,7 @@ impl TryFrom<&Value> for Propfind {
     type Error = Error;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
+        println!("propfind");
         let map = value.to_map()?;
 
         match (

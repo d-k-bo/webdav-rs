@@ -29,8 +29,24 @@ impl TryFrom<&Value> for Multistatus {
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         let map = value.to_map()?;
 
+        let mut response = Vec::new();
+        for (_, value) in &map.0 {
+            if value.is_list() {
+                let list = value.to_list()?;
+                for item in list {
+                    if let Ok(value) = Response::try_from(item) {
+                        response.push(value);
+                    }
+                }
+            } else {
+                if let Ok(value) = Response::try_from(value) {
+                    response.push(value);
+                }
+            }
+        }
+
         Ok(Multistatus {
-            response: map.iter_all().collect::<Result<_, _>>()?,
+            response,
             responsedescription: map.get().transpose()?,
         })
     }
@@ -60,17 +76,22 @@ impl From<Multistatus> for Value {
 }
 
 #[cfg(test)]
-#[test]
-fn test() -> eyre::Result<()> {
-    use http::StatusCode;
+mod test {
+    use crate::FromXml as _;
 
-    use crate::{
-        elements::{Href, Status},
-        FromXml,
-    };
+    use super::*;
 
-    // http://webdav.org/specs/rfc4918.html#n-example---retrieving-named-properties
-    let xml = r#"
+    #[test]
+    fn test() -> eyre::Result<()> {
+        use http::StatusCode;
+
+        use crate::{
+            elements::{Href, Status},
+            FromXml,
+        };
+
+        // http://webdav.org/specs/rfc4918.html#n-example---retrieving-named-properties
+        let xml = r#"
     <?xml version="1.0" encoding="utf-8" ?>
     <D:multistatus xmlns:D="DAV:">
       <D:response xmlns:R="http://ns.example.com/boxschema/">
@@ -98,19 +119,138 @@ fn test() -> eyre::Result<()> {
       </D:responsedescription>
     </D:multistatus>
     "#;
-    let multistatus = Multistatus::from_xml(xml)?;
+        let multistatus = Multistatus::from_xml(xml)?;
 
-    assert!(matches!(
-      &multistatus.response[0],
-        Response::Propstat {
-            href, propstat,
-            responsedescription: None,
-            ..
-        } if href == &Href(http::Uri::from_static("http://www.example.com/file"))
-          && propstat[0].status == Status(StatusCode::OK)
-          && propstat[1].status == Status(StatusCode::FORBIDDEN)
-          && propstat[1].responsedescription.is_some()
-    ));
+        assert!(matches!(
+          &multistatus.response[0],
+            Response::Propstat {
+                href, propstat,
+                responsedescription: None,
+                ..
+            } if href == &Href(http::Uri::from_static("http://www.example.com/file"))
+              && propstat[0].status == Status(StatusCode::OK)
+              && propstat[1].status == Status(StatusCode::FORBIDDEN)
+              && propstat[1].responsedescription.is_some()
+        ));
 
-    Ok(())
+        Ok(())
+    }
+
+    #[test]
+    fn test_should_parse_multi_files() {
+        let response = r#"
+        <?xml version="1.0" encoding="utf-8"?>
+        <D:multistatus xmlns:D="DAV:"
+          xmlns:ns0="DAV:">
+          <D:response xmlns:lp2="http://apache.org/dav/props/"
+            xmlns:lp1="DAV:">
+            <D:href>/ciao/</D:href>
+            <D:propstat>
+              <D:prop>
+                <lp1:resourcetype>
+                  <D:collection/>
+                </lp1:resourcetype>
+                <lp1:creationdate>2024-03-02T15:44:46Z</lp1:creationdate>
+                <lp1:getlastmodified>Sat, 02 Mar 2024 15:44:46 GMT</lp1:getlastmodified>
+                <lp1:getetag>"1a-612af5f3d72b2"</lp1:getetag>
+                <D:supportedlock>
+                  <D:lockentry>
+                    <D:lockscope>
+                      <D:exclusive/>
+                    </D:lockscope>
+                    <D:locktype>
+                      <D:write/>
+                    </D:locktype>
+                  </D:lockentry>
+                  <D:lockentry>
+                    <D:lockscope>
+                      <D:shared/>
+                    </D:lockscope>
+                    <D:locktype>
+                      <D:write/>
+                    </D:locktype>
+                  </D:lockentry>
+                </D:supportedlock>
+                <D:lockdiscovery/>
+                <D:getcontenttype>httpd/unix-directory</D:getcontenttype>
+              </D:prop>
+              <D:status>HTTP/1.1 200 OK</D:status>
+            </D:propstat>
+          </D:response>
+          <D:response xmlns:lp2="http://apache.org/dav/props/"
+            xmlns:lp1="DAV:">
+            <D:href>/ciao/pippo/</D:href>
+            <D:propstat>
+              <D:prop>
+                <lp1:resourcetype>
+                  <D:collection/>
+                </lp1:resourcetype>
+                <lp1:creationdate>2024-03-02T15:40:53Z</lp1:creationdate>
+                <lp1:getlastmodified>Sat, 02 Mar 2024 15:40:53 GMT</lp1:getlastmodified>
+                <lp1:getetag>"0-612af5150498f"</lp1:getetag>
+                <D:supportedlock>
+                  <D:lockentry>
+                    <D:lockscope>
+                      <D:exclusive/>
+                    </D:lockscope>
+                    <D:locktype>
+                      <D:write/>
+                    </D:locktype>
+                  </D:lockentry>
+                  <D:lockentry>
+                    <D:lockscope>
+                      <D:shared/>
+                    </D:lockscope>
+                    <D:locktype>
+                      <D:write/>
+                    </D:locktype>
+                  </D:lockentry>
+                </D:supportedlock>
+                <D:lockdiscovery/>
+                <D:getcontenttype>httpd/unix-directory</D:getcontenttype>
+              </D:prop>
+              <D:status>HTTP/1.1 200 OK</D:status>
+            </D:propstat>
+          </D:response>
+          <D:response xmlns:lp2="http://apache.org/dav/props/"
+            xmlns:lp1="DAV:">
+            <D:href>/ciao/build.rs</D:href>
+            <D:propstat>
+              <D:prop>
+                <lp1:resourcetype/>
+                <lp1:creationdate>2024-03-02T15:44:46Z</lp1:creationdate>
+                <lp1:getcontentlength>486</lp1:getcontentlength>
+                <lp1:getlastmodified>Sat, 02 Mar 2024 15:44:46 GMT</lp1:getlastmodified>
+                <lp1:getetag>"1e6-612af5f3d72b2"</lp1:getetag>
+                <lp2:executable>F</lp2:executable>
+                <D:supportedlock>
+                  <D:lockentry>
+                    <D:lockscope>
+                      <D:exclusive/>
+                    </D:lockscope>
+                    <D:locktype>
+                      <D:write/>
+                    </D:locktype>
+                  </D:lockentry>
+                  <D:lockentry>
+                    <D:lockscope>
+                      <D:shared/>
+                    </D:lockscope>
+                    <D:locktype>
+                      <D:write/>
+                    </D:locktype>
+                  </D:lockentry>
+                </D:supportedlock>
+                <D:lockdiscovery/>
+                <D:getcontenttype>application/rls-services+xml</D:getcontenttype>
+              </D:prop>
+              <D:status>HTTP/1.1 200 OK</D:status>
+            </D:propstat>
+          </D:response>
+        </D:multistatus>
+                
+"#;
+
+        assert!(Multistatus::from_xml(response).is_ok());
+    }
 }
