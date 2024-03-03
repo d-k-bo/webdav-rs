@@ -91,6 +91,10 @@ where
         name: &ElementName<ByteString>,
         value: Value,
     ) -> Result<(), XmlError> {
+        use quick_xml::{
+            escape::partial_escape,
+            events::{attributes::Attribute, BytesEnd, BytesStart, BytesText, Event},
+        };
 
         let raw_name = self.name(name);
 
@@ -108,6 +112,23 @@ where
                 for (tag, value) in map.0 {
                     self.write_value(&tag, value)?;
                 }
+                self.inner
+                    .write_event(Event::End(BytesEnd::new(raw_name)))?;
+
+                Ok(())
+            }
+            Value::Text(text) => {
+                let mut start = BytesStart::new(&*raw_name);
+                for (namespace, prefix) in &self.namespaces {
+                    start.push_attribute(Attribute::from((
+                        &*format!("xmlns:{prefix}"),
+                        &**namespace,
+                    )));
+                }
+
+                self.inner.write_event(Event::Start(start))?;
+                self.inner
+                    .write_event(Event::Text(BytesText::from_escaped(partial_escape(&text))))?;
                 self.inner
                     .write_event(Event::End(BytesEnd::new(raw_name)))?;
 

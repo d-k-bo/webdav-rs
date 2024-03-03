@@ -50,3 +50,37 @@ impl BytesExt for Bytes {
         }
     }
 }
+
+#[cfg(test)]
+#[track_caller]
+pub(crate) fn test_serialize<E: crate::IntoXml>(
+    expected_xml: &'static str,
+    element: E,
+) -> crate::Result<()> {
+    use bytestring::ByteString;
+    use pretty_assertions::assert_str_eq;
+
+    fn trim_xml(xml: &str) -> &str {
+        xml.trim()
+            .trim_start_matches(r#"<?xml version="1.0" encoding="utf-8"?>"#)
+            .trim()
+    }
+
+    let xml = ByteString::try_from(element.into_xml()?).unwrap();
+    assert_str_eq!(trim_xml(expected_xml), trim_xml(&xml));
+
+    Ok(())
+}
+
+#[cfg(test)]
+#[track_caller]
+pub(crate) fn test_deserialize<E: crate::FromXml + PartialEq + std::fmt::Debug>(
+    expected_element: &E,
+    xml: &'static str,
+) -> crate::Result<()> {
+    use pretty_assertions::assert_eq;
+
+    assert_eq!(expected_element, &E::from_xml(xml)?);
+
+    Ok(())
+}
