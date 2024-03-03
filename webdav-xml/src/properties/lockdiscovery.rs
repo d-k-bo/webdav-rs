@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use crate::{Element, Error, Todo, Value, DAV_NAMESPACE, DAV_PREFIX};
+use crate::{Element, ExtractElementError, Todo, Value, DAV_NAMESPACE, DAV_PREFIX};
 
 /// Not yet implemented.
 ///
@@ -18,7 +18,7 @@ impl Element for LockDiscovery {
 }
 
 impl TryFrom<&Value> for LockDiscovery {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(_: &Value) -> Result<Self, Self::Error> {
         todo!()

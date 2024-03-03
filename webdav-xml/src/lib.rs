@@ -31,7 +31,7 @@ pub use nonempty;
 
 pub use self::{
     element::Element,
-    error::{Error, Result},
+    error::{Error, ExtractElementError, ExtractElementErrorKind, Result, XmlError},
     value::{Value, ValueMap},
 };
 
@@ -43,7 +43,7 @@ pub const DAV_PREFIX: &str = "d";
 /// Performs deserialization from XML.
 ///
 /// This trait is automatically implemented for any type which implements the
-/// `Element + for<'v> TryFrom<&'v Value, Error = Error>` traits.
+/// `Element + for<'v> TryFrom<&'v Value, Error = ExtractElementError>` traits.
 /// As such, `FromXml` shouldn't be implemented directly: [`Element`] and
 /// [`TryFrom<&Value>`] should be implemented instead, and you get the `FromXml`
 /// implementation for free.
@@ -53,16 +53,19 @@ pub trait FromXml: Sized {
 
 impl FromXml for Value {
     fn from_xml(xml: impl Into<bytes::Bytes>) -> crate::Result<Self> {
-        crate::read::read_xml(xml)
+        Ok(crate::read::read_xml(xml)?)
     }
 }
 
 impl<E> FromXml for E
 where
-    E: Element + for<'v> TryFrom<&'v Value, Error = Error>,
+    E: Element + for<'v> TryFrom<&'v Value, Error = ExtractElementError>,
 {
     fn from_xml(xml: impl Into<bytes::Bytes>) -> crate::Result<Self> {
-        Value::from_xml(xml)?.to_map()?.get::<E>().required::<E>()?
+        Ok(Value::from_xml(xml)?
+            .to_map()?
+            .get::<E>()
+            .required::<E>()??)
     }
 }
 
@@ -87,7 +90,7 @@ where
     T: Element + Into<Value>,
 {
     fn write_xml(self, writer: impl std::io::Write) -> crate::Result<()> {
-        crate::write::write_xml::<T>(writer, self.into())
+        Ok(crate::write::write_xml::<T>(writer, self.into())?)
     }
 }
 
@@ -98,10 +101,16 @@ where
 enum Todo {}
 
 pub(crate) trait OptionExt<T> {
-    fn required<E: Element>(self) -> crate::Result<T>;
+    fn required<E: Element>(self) -> std::result::Result<T, ExtractElementError>;
 }
 impl<T> OptionExt<T> for Option<T> {
-    fn required<E: Element>(self) -> crate::Result<T> {
-        self.ok_or(Error::MissingElement(E::LOCAL_NAME))
+    #[track_caller]
+    fn required<E: Element>(self) -> std::result::Result<T, ExtractElementError> {
+        match self {
+            Some(v) => Ok(v),
+            None => Err(ExtractElementError::new(
+                ExtractElementErrorKind::MissingElement(E::LOCAL_NAME),
+            )),
+        }
     }
 }

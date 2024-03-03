@@ -5,7 +5,7 @@
 use crate::{
     elements::{Properties, ResponseDescription, Status},
     value::ValueMap,
-    Element, Error, OptionExt, Value, DAV_NAMESPACE, DAV_PREFIX,
+    Element, ExtractElementError, OptionExt, Value, DAV_NAMESPACE, DAV_PREFIX,
 };
 
 /// The `propstat` XML element as defined in [RFC 4918](http://webdav.org/specs/rfc4918.html#ELEMENT_propstat).
@@ -24,7 +24,7 @@ impl Element for Propstat {
 }
 
 impl TryFrom<&Value> for Propstat {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         let map = value.to_map()?;

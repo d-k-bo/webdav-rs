@@ -4,7 +4,7 @@
 
 use bytestring::ByteString;
 
-use crate::{Element, Error, Value, DAV_NAMESPACE, DAV_PREFIX};
+use crate::{Element, ExtractElementError, Value, DAV_NAMESPACE, DAV_PREFIX};
 
 /// The `responsedescription` XML element as defined in [RFC 4918](http://webdav.org/specs/rfc4918.html#ELEMENT_responsedescription).
 #[derive(Clone, Debug, PartialEq)]
@@ -17,7 +17,7 @@ impl Element for ResponseDescription {
 }
 
 impl TryFrom<&Value> for ResponseDescription {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         Ok(Self(value.to_text()?.to_owned()))

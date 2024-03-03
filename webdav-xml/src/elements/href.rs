@@ -4,7 +4,7 @@
 
 use std::str::FromStr;
 
-use crate::{value::Value, Element, Error, DAV_NAMESPACE, DAV_PREFIX};
+use crate::{value::Value, Element, ExtractElementError, DAV_NAMESPACE, DAV_PREFIX};
 
 /// The `href` XML element as defined in [RFC 4918](http://webdav.org/specs/rfc4918.html#ELEMENT_href).
 #[derive(Clone, Debug, PartialEq)]
@@ -17,10 +17,13 @@ impl Element for Href {
 }
 
 impl TryFrom<&Value> for Href {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        Ok(Self(value.to_text()?.parse().map_err(Error::other)?))
+        match value.to_text()?.parse() {
+            Ok(uri) => Ok(Self(uri)),
+            Err(e) => Err(ExtractElementError::other(e)),
+        }
     }
 }
 

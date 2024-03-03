@@ -5,7 +5,8 @@
 use indexmap::IndexMap;
 
 use crate::{
-    element::ElementExt, value::ValueMap, Element, Error, Value, DAV_NAMESPACE, DAV_PREFIX,
+    element::ElementExt, value::ValueMap, Element, ExtractElementError, Value, DAV_NAMESPACE,
+    DAV_PREFIX,
 };
 
 /// The `resourcetype` property as defined in
@@ -35,16 +36,16 @@ impl ResourceType {
             .as_ref()
             .contains_key(&Collection::element_name::<&str>())
     }
-    pub fn get<'v, T>(&'v self) -> Option<Result<T, Error>>
+    pub fn get<'v, T>(&'v self) -> Option<Result<T, ExtractElementError>>
     where
-        T: Element + TryFrom<&'v Value, Error = Error>,
+        T: Element + TryFrom<&'v Value, Error = ExtractElementError>,
     {
         self.0.get::<T>()
     }
 }
 
 impl TryFrom<&Value> for ResourceType {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         value.to_map().cloned().map(Self)

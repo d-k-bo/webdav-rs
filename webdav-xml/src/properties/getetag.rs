@@ -4,7 +4,7 @@
 
 use bytestring::ByteString;
 
-use crate::{Element, Error, Value, DAV_NAMESPACE, DAV_PREFIX};
+use crate::{Element, ExtractElementError, Value, DAV_NAMESPACE, DAV_PREFIX};
 
 /// The `getetag` property as defined in
 /// [RFC 4918](http://webdav.org/specs/rfc4918.html#PROPERTY_getetag).
@@ -18,7 +18,7 @@ impl Element for ETag {
 }
 
 impl TryFrom<&Value> for ETag {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         Ok(Self(value.to_text()?.clone()))

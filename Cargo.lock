@@ -442,7 +442,6 @@ dependencies = [
  "nonempty",
  "pretty_assertions",
  "quick-xml",
- "thiserror",
  "time",
 ]
 

@@ -8,13 +8,13 @@ use bytestring::ByteString;
 
 use crate::{
     element::{Element, ElementExt, ElementName},
-    Value,
+    Value, XmlError,
 };
 
 pub(crate) fn write_xml<E: Element>(
     writer: impl std::io::Write,
     value: Value,
-) -> crate::Result<()> {
+) -> Result<(), XmlError> {
     let mut writer = XmlWriter {
         inner: quick_xml::Writer::new_with_indent(writer, b' ', 2),
         namespaces: HashMap::new(),
@@ -90,8 +90,7 @@ where
         &mut self,
         name: &ElementName<ByteString>,
         value: Value,
-    ) -> crate::Result<()> {
-        use quick_xml::events::{attributes::Attribute, BytesEnd, BytesStart, Event};
+    ) -> Result<(), XmlError> {
 
         let raw_name = self.name(name);
 
@@ -117,8 +116,11 @@ where
             _ => unimplemented!(),
         }
     }
-    fn write_value(&mut self, name: &ElementName<ByteString>, value: Value) -> crate::Result<()> {
-        use quick_xml::events::{BytesEnd, BytesStart, BytesText, Event};
+    fn write_value(
+        &mut self,
+        name: &ElementName<ByteString>,
+        value: Value,
+    ) -> Result<(), XmlError> {
 
         let raw_name = self.name(name);
 

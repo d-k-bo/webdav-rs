@@ -7,7 +7,7 @@ use nonempty::NonEmpty;
 use crate::{
     elements::{response::Response, ResponseDescription},
     value::ValueMap,
-    Element, Error, Value, DAV_NAMESPACE, DAV_PREFIX,
+    Element, ExtractElementError, Value, DAV_NAMESPACE, DAV_PREFIX,
 };
 
 /// The `multistatus` XML element as defined in [RFC 4918](http://webdav.org/specs/rfc4918.html#ELEMENT_multistatus).
@@ -24,7 +24,7 @@ impl Element for Multistatus {
 }
 
 impl TryFrom<&Value> for Multistatus {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         let map = value.to_map()?;

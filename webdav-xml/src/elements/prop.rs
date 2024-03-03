@@ -11,7 +11,7 @@ use crate::{
         LockDiscovery, ResourceType, SupportedLock,
     },
     value::{Value, ValueMap},
-    Error, DAV_NAMESPACE, DAV_PREFIX,
+    ExtractElementError, DAV_NAMESPACE, DAV_PREFIX,
 };
 
 /// The `prop` XML element as defined in [RFC 4918](http://webdav.org/specs/rfc4918.html#ELEMENT_prop).
@@ -50,9 +50,9 @@ impl Properties {
     /// - `Some(Some(Ok(_)))` if the property exists and was successfully
     ///   extracted
     /// - `Some(Some(Err(_)))` if the property exists and extraction failed
-    pub fn get<'v, P>(&'v self) -> Option<Option<Result<P, Error>>>
+    pub fn get<'v, P>(&'v self) -> Option<Option<Result<P, ExtractElementError>>>
     where
-        P: Element + TryFrom<&'v Value, Error = Error>,
+        P: Element + TryFrom<&'v Value, Error = ExtractElementError>,
     {
         self.0.get_optional()
     }
@@ -66,61 +66,63 @@ impl Properties {
     /// Read the `creationdate` property.
     ///
     /// See [`Properties::get()`] for an overview of the possible return values.
-    pub fn creationdate(&self) -> Option<Option<Result<CreationDate, Error>>> {
+    pub fn creationdate(&self) -> Option<Option<Result<CreationDate, ExtractElementError>>> {
         self.get()
     }
     /// Read the `displayname` property.
     ///
     /// See [`Properties::get()`] for an overview of the possible return values.
-    pub fn displayname(&self) -> Option<Option<Result<DisplayName, Error>>> {
+    pub fn displayname(&self) -> Option<Option<Result<DisplayName, ExtractElementError>>> {
         self.get()
     }
     /// Read the `getcontentlanguage` property.
     ///
     /// See [`Properties::get()`] for an overview of the possible return values.
-    pub fn getcontentlanguage(&self) -> Option<Option<Result<ContentLanguage, Error>>> {
+    pub fn getcontentlanguage(
+        &self,
+    ) -> Option<Option<Result<ContentLanguage, ExtractElementError>>> {
         self.get()
     }
     /// Read the `getcontentlength` property.
     ///
     /// See [`Properties::get()`] for an overview of the possible return values.
-    pub fn getcontentlength(&self) -> Option<Option<Result<ContentLength, Error>>> {
+    pub fn getcontentlength(&self) -> Option<Option<Result<ContentLength, ExtractElementError>>> {
         self.get()
     }
     /// Read the `getcontenttype` property.
     ///
     /// See [`Properties::get()`] for an overview of the possible return values.
-    pub fn getcontenttype(&self) -> Option<Option<Result<ContentType, Error>>> {
+    pub fn getcontenttype(&self) -> Option<Option<Result<ContentType, ExtractElementError>>> {
         self.get()
     }
     /// Read the `getetag` property.
     ///
     /// See [`Properties::get()`] for an overview of the possible return values.
-    pub fn getetag(&self) -> Option<Option<Result<ETag, Error>>> {
+    pub fn getetag(&self) -> Option<Option<Result<ETag, ExtractElementError>>> {
         self.get()
     }
     /// Read the `getlastmodified` property.
     ///
     /// See [`Properties::get()`] for an overview of the possible return values.
-    pub fn getlastmodified(&self) -> Option<Option<Result<LastModified, Error>>> {
+    pub fn getlastmodified(&self) -> Option<Option<Result<LastModified, ExtractElementError>>> {
         self.get()
     }
     /// Read the `lockdiscovery` property.
     ///
     /// See [`Properties::get()`] for an overview of the possible return values.
-    pub fn lockdiscovery(&self) -> Option<Option<Result<LockDiscovery, Error>>> {
+    pub fn lockdiscovery(&self) -> Option<Option<Result<LockDiscovery, ExtractElementError>>> {
         self.get()
     }
     /// Read the `resourcetype` property.
     ///
     /// See [`Properties::get()`] for an overview of the possible return values.
-    pub fn resourcetype(&self) -> Option<Option<Result<ResourceType, Error>>> {
+    pub fn resourcetype(&self) -> Option<Option<Result<ResourceType, ExtractElementError>>> {
         self.get()
     }
     /// Read the `supportedlock` property.
     ///
     /// See [`Properties::get()`] for an overview of the possible return values.
-    pub fn supportedlock(&self) -> Option<Option<Result<SupportedLock, Error>>> {
+    pub fn supportedlock(&self) -> Option<Option<Result<SupportedLock, ExtractElementError>>> {
         self.get()
     }
 }
@@ -132,7 +134,7 @@ impl Element for Properties {
 }
 
 impl TryFrom<&Value> for Properties {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         value.to_map().cloned().map(Self)

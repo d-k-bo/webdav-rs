@@ -4,7 +4,7 @@
 
 use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 
-use crate::{Element, Error, Value, DAV_NAMESPACE, DAV_PREFIX};
+use crate::{Element, ExtractElementError, Value, DAV_NAMESPACE, DAV_PREFIX};
 
 /// The `creationdate` property as defined in [RFC 4918](http://webdav.org/specs/rfc4918.html#PROPERTY_creationdate).
 #[derive(Clone, Debug, PartialEq)]
@@ -17,12 +17,13 @@ impl Element for CreationDate {
 }
 
 impl TryFrom<&Value> for CreationDate {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        OffsetDateTime::parse(value.to_text()?, &Rfc3339)
-            .map(Self)
-            .map_err(Error::other)
+        match OffsetDateTime::parse(value.to_text()?, &Rfc3339) {
+            Ok(date) => Ok(Self(date)),
+            Err(e) => Err(ExtractElementError::other(e)),
+        }
     }
 }
 

@@ -6,9 +6,9 @@ use std::borrow::Cow;
 
 use bytestring::ByteString;
 
-use crate::{element::ElementName, utils::BytesExt, value::ValueMap, Error, Value};
+use crate::{element::ElementName, utils::BytesExt, value::ValueMap, Value, XmlError};
 
-pub(crate) fn read_xml(xml: impl Into<bytes::Bytes>) -> crate::Result<Value> {
+pub(crate) fn read_xml(xml: impl Into<bytes::Bytes>) -> Result<Value, XmlError> {
     let xml = xml.into();
     let mut reader = XmlReader::new(&xml);
     reader.read_into_value(&xml)
@@ -39,7 +39,7 @@ impl<'x> XmlReader<'x> {
         Ok((resolve_result, event))
     }
 
-    fn read_into_value(&mut self, xml: &bytes::Bytes) -> crate::Result<Value> {
+    fn read_into_value(&mut self, xml: &bytes::Bytes) -> Result<Value, XmlError> {
         use quick_xml::{
             events::{BytesStart, Event},
             name::ResolveResult,
@@ -49,11 +49,11 @@ impl<'x> XmlReader<'x> {
             xml: &bytes::Bytes,
             resolve_result: &ResolveResult,
             tag: &BytesStart<'_>,
-        ) -> crate::Result<ElementName<ByteString>> {
+        ) -> Result<ElementName<ByteString>, XmlError> {
             match resolve_result {
                 ResolveResult::Bound(ns) => {
                     if ns.as_ref().is_empty() {
-                        return Err(Error::InvalidNamespace(xml.maybe_slice_ref(ns.as_ref())));
+                        return Err(XmlError::InvalidNamespace(xml.maybe_slice_ref(ns.as_ref())));
                     }
 
                     Ok(ElementName {
@@ -104,7 +104,7 @@ impl<'x> XmlReader<'x> {
 
                     if !matches!(self.last(), Some(Event::End(end)) if end.name().as_ref() == start_name)
                     {
-                        return Err(Error::UnexpectedTag);
+                        return Err(XmlError::UnexpectedTag);
                     }
                 }
                 Event::Empty(tag) => {

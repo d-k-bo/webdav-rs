@@ -4,7 +4,7 @@
 
 use std::{fmt::Display, str::FromStr};
 
-use crate::{Element, Error, Value, DAV_NAMESPACE, DAV_PREFIX};
+use crate::{Element, ExtractElementError, Value, DAV_NAMESPACE, DAV_PREFIX};
 
 /// The `status` XML element as defined in [RFC 4918](http://webdav.org/specs/rfc4918.html#ELEMENT_status).
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -42,10 +42,13 @@ impl Display for Status {
     }
 }
 impl TryFrom<&Value> for Status {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        value.to_text()?.parse().map_err(Error::other)
+        match value.to_text()?.parse() {
+            Ok(status) => Ok(status),
+            Err(e) => Err(ExtractElementError::other(e)),
+        }
     }
 }
 impl From<Status> for Value {
@@ -54,9 +57,16 @@ impl From<Status> for Value {
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-#[error("invalid status: {0}")]
+#[derive(Debug)]
 pub struct InvalidStatus(String);
+
+impl std::fmt::Display for InvalidStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "invalid status: {}", self.0)
+    }
+}
+
+impl std::error::Error for InvalidStatus {}
 
 #[cfg(test)]
 #[test]

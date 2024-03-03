@@ -4,7 +4,10 @@
 
 use bytestring::ByteString;
 
-use crate::{elements::Properties, Element, Error, Value, DAV_NAMESPACE, DAV_PREFIX};
+use crate::{
+    elements::Properties, Element, ExtractElementError, ExtractElementErrorKind, Value,
+    DAV_NAMESPACE, DAV_PREFIX,
+};
 
 /// The `propfind` XML element as defined in [RFC 4918](http://webdav.org/specs/rfc4918.html#ELEMENT_propfind).
 #[derive(Clone, Debug, PartialEq)]
@@ -21,7 +24,7 @@ impl Element for Propfind {
 }
 
 impl TryFrom<&Value> for Propfind {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         let map = value.to_map()?;
@@ -36,8 +39,8 @@ impl TryFrom<&Value> for Propfind {
                 include: map.get().transpose()?,
             }),
             (None, None, Some(prop)) => Ok(Propfind::Prop(prop?)),
-            _ => Err(Error::ConflictingElements(
-                "`propname`, `allprop` and `include` must not be used at the same time",
+            _ => Err(ExtractElementError::new(
+                ExtractElementErrorKind::ConflictingElements(&["propname", "allprop", "include"]),
             )),
         }
     }
@@ -54,7 +57,7 @@ impl Element for Propname {
 }
 
 impl TryFrom<&Value> for Propname {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(_: &Value) -> Result<Self, Self::Error> {
         Ok(Propname)
@@ -72,7 +75,7 @@ impl Element for Allprop {
 }
 
 impl TryFrom<&Value> for Allprop {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(_: &Value) -> Result<Self, Self::Error> {
         Ok(Allprop)
@@ -90,7 +93,7 @@ impl Element for Include {
 }
 
 impl TryFrom<&Value> for Include {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(_: &Value) -> Result<Self, Self::Error> {
         todo!()

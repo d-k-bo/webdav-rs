@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use crate::{Element, Error, Value, DAV_NAMESPACE, DAV_PREFIX};
+use crate::{Element, ExtractElementError, Value, DAV_NAMESPACE, DAV_PREFIX};
 
 /// The `getcontentlength` property as defined in
 /// [RFC 4918](http://webdav.org/specs/rfc4918.html#PROPERTY_getcontentlength).
@@ -16,10 +16,13 @@ impl Element for ContentLength {
 }
 
 impl TryFrom<&Value> for ContentLength {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        value.to_text()?.parse().map(Self).map_err(Error::other)
+        match value.to_text()?.parse() {
+            Ok(len) => Ok(Self(len)),
+            Err(e) => Err(ExtractElementError::other(e)),
+        }
     }
 }
 

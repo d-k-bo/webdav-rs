@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **BREAKING**: Rename `Value::to_str` to `Value::to_text`
+- **BREAKING**: Split `webdav::xml::Error` into `webdav::xml::ExtractElementError` and `webdav::xml::XmlError`
 
 ### Fixed
 

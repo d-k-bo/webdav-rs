@@ -4,7 +4,7 @@
 
 use mime::Mime;
 
-use crate::{Element, Error, Value, DAV_NAMESPACE, DAV_PREFIX};
+use crate::{Element, ExtractElementError, Value, DAV_NAMESPACE, DAV_PREFIX};
 
 /// The `getcontenttype` property as defined in
 /// [RFC 4918](http://webdav.org/specs/rfc4918.html#PROPERTY_getcontenttype).
@@ -18,10 +18,13 @@ impl Element for ContentType {
 }
 
 impl TryFrom<&Value> for ContentType {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
-        value.to_text()?.parse().map(Self).map_err(Error::other)
+        match value.to_text()?.parse() {
+            Ok(mime) => Ok(Self(mime)),
+            Err(e) => Err(ExtractElementError::other(e)),
+        }
     }
 }
 

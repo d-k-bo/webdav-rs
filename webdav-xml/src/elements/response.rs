@@ -8,7 +8,7 @@ use crate::{
     elements::{Href, Propstat, ResponseDescription, Status},
     utils::NonEmptyExt,
     value::ValueMap,
-    Element, Error, OptionExt, Value, DAV_NAMESPACE, DAV_PREFIX,
+    Element, ExtractElementError, OptionExt, Value, DAV_NAMESPACE, DAV_PREFIX,
 };
 
 /// The `response` XML element as defined in [RFC 4918](http://webdav.org/specs/rfc4918.html#ELEMENT_response).
@@ -37,7 +37,7 @@ impl Element for Response {
 }
 
 impl TryFrom<&Value> for Response {
-    type Error = Error;
+    type Error = ExtractElementError;
 
     fn try_from(value: &Value) -> Result<Self, Self::Error> {
         let map = value.to_map()?;

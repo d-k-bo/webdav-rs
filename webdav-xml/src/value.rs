@@ -8,7 +8,7 @@ use nonempty::{nonempty, NonEmpty};
 
 use crate::{
     element::{Element, ElementExt, ElementName},
-    Error,
+    ExtractElementError, ExtractElementErrorKind,
 };
 
 /// Represents the content of an XML element.
@@ -32,23 +32,42 @@ pub enum Value {
 }
 
 impl Value {
-    pub fn to_text(&self) -> Result<&ByteString, Error> {
+    #[track_caller]
+    pub fn to_text(&self) -> Result<&ByteString, ExtractElementError> {
         match self {
             Self::Text(s) => Ok(s),
-            _ => Err(Error::InvalidValueType("expected text")),
-        }
-    }
-    pub fn to_map(&self) -> Result<&ValueMap, Error> {
-        match self {
-            Self::Map(map) => Ok(map),
-            _ => Err(Error::InvalidValueType("expected a map")),
+            _ => Err(ExtractElementError::new(
+                ExtractElementErrorKind::InvalidValueType {
+                    expected: "text",
+                    got: self.value_type(),
+                },
+            )),
         }
     }
 
-    pub fn to_list(&self) -> Result<&NonEmpty<Value>, Error> {
+    #[track_caller]
+    pub fn to_map(&self) -> Result<&ValueMap, ExtractElementError> {
+        match self {
+            Self::Map(map) => Ok(map),
+            _ => Err(ExtractElementError::new(
+                ExtractElementErrorKind::InvalidValueType {
+                    expected: "map",
+                    got: self.value_type(),
+                },
+            )),
+        }
+    }
+
+    #[track_caller]
+    pub fn to_list(&self) -> Result<&NonEmpty<Value>, ExtractElementError> {
         match self {
             Self::List(list) => Ok(list),
-            _ => Err(Error::InvalidValueType("expected a list")),
+            _ => Err(ExtractElementError::new(
+                ExtractElementErrorKind::InvalidValueType {
+                    expected: "list",
+                    got: self.value_type(),
+                },
+            )),
         }
     }
 
@@ -66,6 +85,15 @@ impl Value {
 
     pub fn is_list(&self) -> bool {
         matches!(self, Self::List(_))
+    }
+
+    fn value_type(&self) -> &'static str {
+        match self {
+            Value::Empty => "empty",
+            Value::Text(..) => "text",
+            Value::Map(..) => "map",
+            Value::List(..) => "list",
+        }
     }
 }
 
@@ -92,9 +120,9 @@ impl ValueMap {
     /// - `None` if the element doesn't exist
     /// - `Some(Ok(_))` if the element exists and was successfully extracted
     /// - `Some(Err(_))` if the element exists and extraction failed
-    pub fn get<'v, E>(&'v self) -> Option<Result<E, Error>>
+    pub fn get<'v, E>(&'v self) -> Option<Result<E, ExtractElementError>>
     where
-        E: Element + TryFrom<&'v Value, Error = Error>,
+        E: Element + TryFrom<&'v Value, Error = ExtractElementError>,
     {
         self.0
             .get(&E::element_name::<&'static str>())
@@ -110,9 +138,9 @@ impl ValueMap {
     ///   successfully extracted
     /// - `Some(Some(Err(_)))` if the element exists, is not empty and
     ///   extraction failed
-    pub fn get_optional<'v, E>(&'v self) -> Option<Option<Result<E, Error>>>
+    pub fn get_optional<'v, E>(&'v self) -> Option<Option<Result<E, ExtractElementError>>>
     where
-        E: Element + TryFrom<&'v Value, Error = Error>,
+        E: Element + TryFrom<&'v Value, Error = ExtractElementError>,
     {
         self.0
             .get(&E::element_name::<&'static str>())
@@ -129,9 +157,11 @@ impl ValueMap {
 }
 
 impl ValueMap {
-    pub(crate) fn iter_all<'v, E>(&'v self) -> impl Iterator<Item = Result<E, Error>> + 'v
+    pub(crate) fn iter_all<'v, E>(
+        &'v self,
+    ) -> impl Iterator<Item = Result<E, ExtractElementError>> + 'v
     where
-        E: Element + TryFrom<&'v Value, Error = Error> + 'v,
+        E: Element + TryFrom<&'v Value, Error = ExtractElementError> + 'v,
     {
         enum ElementIter<'a> {
             List(nonempty::Iter<'a, Value>),
