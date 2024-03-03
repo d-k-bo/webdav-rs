@@ -33,3 +33,17 @@ impl From<ContentType> for Value {
         content_type.to_string().into()
     }
 }
+
+#[cfg(test)]
+#[test]
+fn test() -> eyre::Result<()> {
+    use crate::utils::{test_deserialize, test_serialize};
+
+    let xml = r#"<d:getcontenttype xmlns:d="DAV:">text/html</d:getcontenttype>"#;
+    let content_type = ContentType(mime::TEXT_HTML);
+
+    test_deserialize(&content_type, xml)?;
+    test_serialize(xml, content_type)?;
+
+    Ok(())
+}

@@ -30,3 +30,17 @@ impl From<ETag> for Value {
         Value::Text(s)
     }
 }
+
+#[cfg(test)]
+#[test]
+fn test() -> eyre::Result<()> {
+    use crate::utils::{test_deserialize, test_serialize};
+
+    let xml = r#"<d:getetag xmlns:d="DAV:">"10c24bc-4ab-457e1c1f"</d:getetag>"#;
+    let etag = ETag(r#""10c24bc-4ab-457e1c1f""#.into());
+
+    test_deserialize(&etag, xml)?;
+    test_serialize(xml, etag)?;
+
+    Ok(())
+}

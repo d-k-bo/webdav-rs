@@ -67,3 +67,43 @@ impl Element for Collection {
     const PREFIX: &'static str = DAV_PREFIX;
     const LOCAL_NAME: &'static str = "collection";
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::utils::{test_deserialize, test_serialize};
+
+    use super::ResourceType;
+
+    #[test]
+    fn empty() -> eyre::Result<()> {
+        let xml = r#"
+<d:resourcetype xmlns:d="DAV:">
+</d:resourcetype>
+        "#;
+        let resource_type = ResourceType::empty();
+
+        assert!(!resource_type.is_collection());
+
+        test_deserialize(&resource_type, xml)?;
+        test_serialize(xml, resource_type)?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn collection() -> eyre::Result<()> {
+        let xml = r#"
+<d:resourcetype xmlns:d="DAV:">
+  <d:collection/>
+</d:resourcetype>
+        "#;
+        let resource_type = ResourceType::collection();
+
+        assert!(resource_type.is_collection());
+
+        test_deserialize(&resource_type, xml)?;
+        test_serialize(xml, resource_type)?;
+
+        Ok(())
+    }
+}

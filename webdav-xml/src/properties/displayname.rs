@@ -30,3 +30,17 @@ impl From<DisplayName> for Value {
         Value::Text(s)
     }
 }
+
+#[cfg(test)]
+#[test]
+fn test() -> eyre::Result<()> {
+    use crate::utils::{test_deserialize, test_serialize};
+
+    let xml = r#"<d:displayname xmlns:d="DAV:">Example HTML resource</d:displayname>"#;
+    let display_name = DisplayName("Example HTML resource".into());
+
+    test_deserialize(&display_name, xml)?;
+    test_serialize(xml, display_name)?;
+
+    Ok(())
+}

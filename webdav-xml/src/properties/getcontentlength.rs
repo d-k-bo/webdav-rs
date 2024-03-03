@@ -31,3 +31,17 @@ impl From<ContentLength> for Value {
         len.to_string().into()
     }
 }
+
+#[cfg(test)]
+#[test]
+fn test() -> eyre::Result<()> {
+    use crate::utils::{test_deserialize, test_serialize};
+
+    let xml = r#"<d:getcontentlength xmlns:d="DAV:">1234</d:getcontentlength>"#;
+    let content_length = ContentLength(1234);
+
+    test_deserialize(&content_length, xml)?;
+    test_serialize(xml, content_length)?;
+
+    Ok(())
+}

@@ -30,3 +30,17 @@ impl From<ContentLanguage> for Value {
         Value::Text(s)
     }
 }
+
+#[cfg(test)]
+#[test]
+fn test() -> eyre::Result<()> {
+    use crate::utils::{test_deserialize, test_serialize};
+
+    let xml = r#"<d:getcontentlanguage xmlns:d="DAV:">de-DE, en-CA</d:getcontentlanguage>"#;
+    let content_language = ContentLanguage("de-DE, en-CA".into());
+
+    test_deserialize(&content_language, xml)?;
+    test_serialize(xml, content_language)?;
+
+    Ok(())
+}
