@@ -121,6 +121,10 @@ where
         name: &ElementName<ByteString>,
         value: Value,
     ) -> Result<(), XmlError> {
+        use quick_xml::{
+            escape::partial_escape,
+            events::{BytesEnd, BytesStart, BytesText, Event},
+        };
 
         let raw_name = self.name(name);
 
@@ -132,7 +136,8 @@ where
             Value::Text(text) => {
                 self.inner
                     .write_event(Event::Start(BytesStart::new(&*raw_name)))?;
-                self.inner.write_event(Event::Text(BytesText::new(&text)))?;
+                self.inner
+                    .write_event(Event::Text(BytesText::from_escaped(partial_escape(&text))))?;
                 self.inner
                     .write_event(Event::End(BytesEnd::new(raw_name)))?;
             }
