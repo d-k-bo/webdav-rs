@@ -6,6 +6,20 @@ SPDX-License-Identifier: CC0-1.0
 
 # webdav-rs
 
+> [!WARNING]
+> ## This project is no longer maintained
+>
+> ### Why?
+>
+> As a hobbyist programmer, I have invested a significant amount of my personal time and energy into many projects. Due to increasing personal and professional commitments, I have significant less time to dedicate to software development. I am therefore focusing on the projects that I actively use myself and enjoy working on the most. Recent developments in "AI" have also contributed to a general decline in my interest in software development.
+>
+> ### What does this mean?
+>
+> - This project will not be actively maintained for the foreseeable future. Accordingly, it should be considered as deprecated.
+> - The project remains available under the terms of the corresponding free software license.
+> - You are welcome to redistribute, fork and continue its development under the terms of the said ‍‍‍license.
+
+
 [![Build Status][ci-badge]][ci-link]
 [![REUSE Compliance Check][reuse-badge]][reuse-link]
 [![crates.io][crates-badge]][crates-link]
