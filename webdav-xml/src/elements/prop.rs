@@ -148,13 +148,17 @@ impl From<Properties> for Value {
 }
 
 #[cfg(test)]
-#[test]
-fn test_deserialize() -> eyre::Result<()> {
-    use pretty_assertions::assert_eq;
-
+mod tests {
+    use crate::elements::Properties;
+    use crate::properties::*;
     use crate::FromXml;
+    use crate::IntoXml;
 
-    let xml = r#"
+    #[test]
+    fn test_deserialize() -> eyre::Result<()> {
+        use pretty_assertions::assert_eq;
+
+        let xml = r#"
     <d:prop xmlns:d="DAV:">
         <d:getlastmodified>Mon, 30 Sep 2019 12:13:02 GMT</d:getlastmodified>
         <d:getcontentlength>0</d:getcontentlength>
@@ -164,22 +168,54 @@ fn test_deserialize() -> eyre::Result<()> {
     </d:prop>
     "#;
 
-    let prop = Properties::from_xml(xml)?;
+        let prop = Properties::from_xml(xml)?;
 
-    assert_eq!(
-        prop.getlastmodified().unwrap().unwrap()?,
-        LastModified("Mon, 30 Sep 2019 12:13:02 GMT".parse()?)
-    );
-    assert_eq!(prop.getcontentlength().unwrap().unwrap()?, ContentLength(0));
-    assert!(prop.resourcetype().unwrap().is_none());
-    assert_eq!(
-        prop.getetag().unwrap().unwrap()?,
-        ETag(r#""a28785e285ce0de0738676814705c4e1""#.into())
-    );
-    assert_eq!(
-        prop.getcontenttype().unwrap().unwrap()?,
-        ContentType(mime::TEXT_PLAIN)
-    );
+        assert_eq!(
+            prop.getlastmodified().unwrap().unwrap()?,
+            LastModified("Mon, 30 Sep 2019 12:13:02 GMT".parse()?)
+        );
+        assert_eq!(prop.getcontentlength().unwrap().unwrap()?, ContentLength(0));
+        assert!(prop.resourcetype().unwrap().is_none());
+        assert_eq!(
+            prop.getetag().unwrap().unwrap()?,
+            ETag(r#""a28785e285ce0de0738676814705c4e1""#.into())
+        );
+        assert_eq!(
+            prop.getcontenttype().unwrap().unwrap()?,
+            ContentType(mime::TEXT_PLAIN)
+        );
 
-    Ok(())
+        Ok(())
+    }
+
+    #[test]
+    fn test_serialize() {
+        let prop = Properties::new()
+            .with(LastModified(
+                "Mon, 30 Sep 2019 12:13:02 GMT".parse().unwrap(),
+            ))
+            .with(ContentLength(0))
+            .with_name::<ResourceType>()
+            .with(ETag(r#""a28785e285ce0de0738676814705c4e1""#.into()))
+            .with_name::<ETag>()
+            .with(ContentType(mime::TEXT_PLAIN));
+
+        let bytes = prop.into_xml().expect("serialization failed");
+
+        let xml = String::from_utf8(bytes.to_vec()).expect("invalid UTF-8");
+
+        let expected_xml = r#"
+<?xml version="1.0" encoding="utf-8"?>
+<d:prop xmlns:d="DAV:">
+  <d:getlastmodified>Mon, 30 Sep 2019 12:13:02 GMT</d:getlastmodified>
+  <d:getcontentlength>0</d:getcontentlength>
+  <d:resourcetype/>
+  <d:getetag>"a28785e285ce0de0738676814705c4e1"</d:getetag>
+  <d:getetag/>
+  <d:getcontenttype>text/plain</d:getcontenttype>
+</d:prop>
+"#;
+
+        assert_eq!(xml.trim(), expected_xml.trim());
+    }
 }

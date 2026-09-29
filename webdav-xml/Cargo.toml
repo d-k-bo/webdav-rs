@@ -22,7 +22,7 @@ indexmap = "2.2.3"
 mime = "0.3.17"
 nonempty = { workspace = true }
 quick-xml = "0.31.0"
-time = { version = "0.3.34", features = ["parsing", "formatting"] }
+time = { version = "0.3.44", features = ["parsing", "formatting"] }
 
 [dev-dependencies]
 eyre = { workspace = true }

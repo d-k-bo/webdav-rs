@@ -85,39 +85,44 @@ to constants in the future.
 <details>
     <summary>XML Elements</summary>
 
-- [ ] `activelock`
+- [X] `activelock`
 - [X] `allprop`: internally implemented for
   `Propfind`
 - [X] `collection`: internally implemented for
   `ResourceType`
-- [ ] `depth`
+- [X] `depth`
 - [ ] `error`: currently just a string
-- [ ] `exclusive`
+- [X] `exclusive`: internally implemented for
+  `LockScope`
 - [X] `href`
 - [X] `include`
 - [ ] `location`
-- [ ] `lockentry`
-- [ ] `lockinfo`
-- [ ] `lockroot`
-- [ ] `lockscope`
-- [ ] `locktoken`
-- [ ] `locktype`
+- [X] `lockentry`
+- [X] `lockinfo`
+- [X] `lockroot`
+- [X] `lockscope`
+- [X] `locktoken`
+- [X] `locktype`
 - [X] `multistatus`
-- [ ] `owner`
+- [X] `owner`
 - [X] `prop`
-- [ ] `propertyupdate`
+- [X] `propertyupdate`
 - [X] `propfind`
 - [X] `propname`: internally implemented for
   `Propfind`
 - [X] `propstat`
-- [ ] `remove`
+- [X] `remove`: internally implemented for
+  `PropertyUpdate`
 - [X] `response`
 - [X] `responsedescription`
-- [ ] `set`
-- [ ] `shared`
+- [X] `set`: internally implemented for
+  `PropertyUpdate`
+- [X] `shared`: internally implemented for
+  `LockScope`
 - [ ] `status`
-- [ ] `timeout`
-- [ ] `write`
+- [X] `timeout`
+- [X] `write`: internally implemented for
+  `LockType`
 
 </details>
 <details>
